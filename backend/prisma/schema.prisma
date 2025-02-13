@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id        String   @id @default(uuid())
+  roomId    String   @unique
+  pgn       String   @default("")
+  player1   String
+  player2   String?
+  result    String?
+  white     PlayerRole?
+  black     PlayerRole?
+  turn      Turn    @default(white)
+  createdAt DateTime @default(now())
+}
+
+enum PlayerRole {
+  player1
+  player2
+}
+
+enum Turn {
+  black
+  white
+}
