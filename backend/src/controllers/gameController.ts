@@ -7,8 +7,10 @@ export const createGameRoom = async (req: Request, res: Response) => {
 
     const roomId = uuidv4();
     const game = await createGame(roomId, player1);
-    res.json({
+    console.log(`A new game has been created with roomId: ${game.roomId}`)
+    res.status(200).json({
         roomId,
+        message: "Game created Successfully"
     })
 }
 

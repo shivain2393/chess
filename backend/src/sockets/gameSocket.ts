@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { updateGame, getGameById } from "../models/game";
 import { prisma } from "../config/prisma";
 import { validateMoves } from "../utils/chess";
-import { PlayerRole } from "@prisma/client";
+import { PlayerRole, Turn } from "@prisma/client";
 
 export const setupSocket = (io: Server) => {
     io.on("connection", (socket) => {
@@ -50,23 +50,51 @@ export const setupSocket = (io: Server) => {
             const updatedGame = await getGameById(roomId);
 
             if(updatedGame.player1 && updatedGame.player2) {
+
+                io.to(roomId).emit("startGame", { roomId });
+
                 if(updatedGame.white === PlayerRole.player1) {
                     io.to(updatedGame.player1).emit("playerRole", {
-                        message: "You are white",
+                        playerRole: Turn.white,
                     })
                     io.to(updatedGame.player2).emit("playerRole", {
-                        message: "You are black",
+                        playerRole: Turn.black,
                     })
                 } else {
                     io.to(updatedGame.player1).emit("playerRole", {
-                        message: "You are black",
+                        playerRole: Turn.black,
                     })
                     io.to(updatedGame.player2).emit("playerRole", {
-                        message: "You are white",
+                        playerRole: Turn.white,
                     })
                 }
             }
         });
+
+        socket.on("getPlayerRole", async ({ roomId }: { roomId: string }) => {
+            const game = await getGameById(roomId);
+            const userId = socket.id;
+
+            if(!game) {
+                socket.emit("error", () => {
+                    message: "Game not Found"
+                })
+            }
+
+            let playerRole: Turn | null = null;
+
+            if (game.player1 === userId) {
+                playerRole = game.white === PlayerRole.player1 ? Turn.white : Turn.black;
+            } else if (game.player2 === userId) {
+                playerRole = game.white === PlayerRole.player2 ? Turn.white : Turn.black;
+            } else {
+                socket.emit("error", { message: "You are not a player in this game" });
+                return;
+            }
+
+            socket.emit("playerRole", { playerRole });
+
+        })
 
         socket.on("move", async ({ roomId, move } : { roomId: string, move: string }) => {
             try {
