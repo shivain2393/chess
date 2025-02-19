@@ -127,7 +127,7 @@ export const setupSocket = (io: Server) => {
                     return;
                 }
     
-                io.to(roomId).emit("gameState", updatedGame.pgn);
+                io.to(roomId).emit("gameState", { fen: updatedGame.fen });
 
                 if(updatedGame.result && updatedGame.result !== "ongoing") {
                     io.to(roomId).emit("gameOver", {

@@ -55,22 +55,22 @@ export const setupSocketListeners = (
         callbacks.onRoomFull?.();
     })
 
-    socket.on("startGame", ({ roomId }) => {
+    socket.on("startGame", ({ roomId } : { roomId: string }) => {
         console.log("Game stared in room: ", roomId);
         callbacks.onGameStart?.(roomId);
     })
 
-    socket.on("playerRole", ({ playerRole }) => {
+    socket.on("playerRole", ({ playerRole } : { playerRole: "white" | "black" }) => {
         console.log("Assigned Role: ", playerRole);
         callbacks.onPlayerRole?.(playerRole);
     })
 
-    socket.on("gameState", (pgn) => {
-        console.log("Game state updated", pgn);
-        callbacks.onGameState?.(pgn);
+    socket.on("gameState", ({ fen } : { fen: string }) => {
+        console.log("Game state updated", fen);
+        callbacks.onGameState?.(fen);
     });
 
-    socket.on("gameOver", ({ message }) => {
+    socket.on("gameOver", ({ message } : { message : string}) => {
         console.log("Game Over:", message);
         callbacks.onGameOver?.(message);
     });

@@ -40,26 +40,30 @@ const CustomGame = () => {
         setClientSocket(socket);
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/game/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    player1: socket.id
+            if(!gameId){
+                const response = await fetch(`${BACKEND_URL}/api/game/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        player1: socket.id
+                    })
                 })
-            })
-
-            const data = await response.json();
-
-            if(!data) {
-                throw new Error("Error while creating a game");
+    
+                const data = await response.json();
+    
+                if(!data) {
+                    throw new Error("Error while creating a game");
+                }
+    
+                setGameId(data.roomId);
+                socket.emit("joinRoom", { roomId: data.roomId });
+    
             }
 
-            setGameId(data.roomId);
             setShowCreateModal(true);
 
-            socket.emit("joinRoom", { roomId: data.roomId });
             
         } catch (error) {
             console.error("Error creating a game: ", error)
@@ -90,7 +94,7 @@ const CustomGame = () => {
 
     return (
         <div>
-            <Button disabled={gameId !== null} onClick={handleCreateBtnClick}>Create</Button>
+            <Button onClick={handleCreateBtnClick}>Create</Button>
             <Button onClick={handleJoinBtnClick}>Join</Button>
             {/* Modal */}
             {showCreateModal && (

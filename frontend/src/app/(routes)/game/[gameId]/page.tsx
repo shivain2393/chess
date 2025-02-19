@@ -45,7 +45,7 @@ const Game = () => {
   return (
     <div className="w-full flex flex-col h-screen justify-center items-center border">
       {playerRole ? (
-        <Chess playerRole={playerRole}/>
+        <Chess playerRole={playerRole} socket={socket} gameId={gameId}/>
       ) : (
         <Loading>
           Loading Game

@@ -8,7 +8,7 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
     try {
         const chess = new Chess();
     
-        if(game.pgn) chess.loadPgn(game.pgn);
+        if(game.fen) chess.load(game.fen);
     
         const isWhiteTurn = chess.turn() === 'w';
     
@@ -27,7 +27,8 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
             return null;
         }
     
-        const updatedPgn = chess.pgn();
+        const updatedPgn = game.pgn ? `${game.pgn} ${chess.pgn().split("\n\n")[1]}` : chess.pgn()
+        const updatedFen = chess.fen();
     
         let gameStatus = "ongoing";
         if(chess.isCheckmate()) gameStatus = "checkmate";
@@ -40,11 +41,14 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
                 roomId: game.roomId
             }, 
             data: {
+                fen: updatedFen,
                 pgn: updatedPgn,
                 turn: isWhiteTurn ? Turn.black : Turn.white,
                 result: gameStatus !== "ongoing" ? gameStatus : null
             }
         })
+
+
     } catch (error) {
         console.error(`Error in validating moves: ${error}`)
         socket.emit("error", { message: "An error occurred while processing your move" })

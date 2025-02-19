@@ -11,16 +11,18 @@ datasource db {
 }
 
 model Game {
-  id        String   @id @default(uuid())
-  roomId    String   @unique
-  pgn       String   @default("")
+  id        String      @id @default(uuid())
+  roomId    String      @unique
+  fen       String      @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  pgn       String      @default("")
   player1   String
   player2   String?
   result    String?
   white     PlayerRole?
   black     PlayerRole?
-  turn      Turn    @default(white)
-  createdAt DateTime @default(now())
+  turn      Turn        @default(white)
+  winner    PlayerRole? 
+  createdAt DateTime    @default(now())
 }
 
 enum PlayerRole {
