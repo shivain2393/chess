@@ -3,6 +3,7 @@
 import Chess from "@/components/Chess";
 import Loading from "@/components/Loading";
 import { getSocket, setupSocketListeners } from "@/lib/socket";
+import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
@@ -43,7 +44,12 @@ const Game = () => {
   });
 
   return (
-    <div className="w-full flex flex-col h-screen justify-center items-center border">
+    <div className={cn(
+      "container mx-auto flex flex-col items-center", 
+      {
+        "mt-40": playerRole === null
+      }
+    )}>
       {playerRole ? (
         <Chess playerRole={playerRole} socket={socket} gameId={gameId}/>
       ) : (

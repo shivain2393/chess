@@ -1,132 +1,171 @@
-'use client';
+"use client";
 
-import Button from "@/components/Button"
 import { BACKEND_URL } from "@/config/env";
 import { getSocket, setupSocketListeners } from "@/lib/socket";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { Copy } from "lucide-react";
 
 const CustomGame = () => {
-    const [clientSocket, setClientSocket] = useState<Socket | null> (null);
-    const [gameId, setGameId] = useState<string | null>();
-    const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-    const [showJoinModal, setShowJoinModal] = useState<boolean>(false);
-    const [joinRoomInput, setJoinRoomInput] = useState<string>("");
-    const router = useRouter();
+  const [clientSocket, setClientSocket] = useState<Socket | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
+  const [joinRoomInput, setJoinRoomInput] = useState<string>("");
+  const router = useRouter();
+  const { toast } = useToast();
 
-    useEffect(() => {
-        if(!clientSocket) return;
+  useEffect(() => {
+    if (!clientSocket) return;
 
-        setupSocketListeners(clientSocket, {
-            onRoomFull: () => alert("Room is already full"),
-            onGameStart: (roomId) => {
-                if(!gameId) {
-                    setGameId(roomId);
-                }
+    setupSocketListeners(clientSocket, {
+      onRoomFull: () => alert("Room is already full"),
+      onGameStart: (roomId) => {
+        if (!gameId) {
+          setGameId(roomId);
+        }
 
-                router.push(`/game/${roomId}`);
-            },
-            onGameState: (pgn) => console.log("Game Updated:", pgn),
-            onGameOver: (message) => alert(message),
+        router.push(`/game/${roomId}`);
+      },
+      onGameState: (pgn) => console.log("Game Updated:", pgn),
+      onGameOver: (message) => alert(message),
+    });
+  }, [clientSocket]);
+
+  const handleCreateBtnClick = async () => {
+    const socket = await getSocket();
+    setClientSocket(socket);
+
+    try {
+      if (!gameId) {
+        const response = await fetch(`${BACKEND_URL}/api/game/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            player1: socket.id,
+          }),
         });
 
-    }, [clientSocket])
+        const data = await response.json();
 
-
-    const handleCreateBtnClick = async () => {
-
-        const socket = await getSocket();
-        setClientSocket(socket);
-        
-        try {
-            if(!gameId){
-                const response = await fetch(`${BACKEND_URL}/api/game/create`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        player1: socket.id
-                    })
-                })
-    
-                const data = await response.json();
-    
-                if(!data) {
-                    throw new Error("Error while creating a game");
-                }
-    
-                setGameId(data.roomId);
-                socket.emit("joinRoom", { roomId: data.roomId });
-    
-            }
-
-            setShowCreateModal(true);
-
-            
-        } catch (error) {
-            console.error("Error creating a game: ", error)
+        if (!data) {
+          throw new Error("Error while creating a game");
         }
+
+        setGameId(data.roomId);
+        socket.emit("joinRoom", { roomId: data.roomId });
+      }
+    } catch (error) {
+      console.error("Error creating a game: ", error);
+    }
+  };
+
+  const handleJoinGame = async () => {
+    if (!joinRoomInput.trim()) {
+      toast({
+        title: "Please Enter valid Room Id.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    const handleJoinBtnClick = () => {
-        setShowJoinModal(true);
+    const socket = await getSocket();
+    setClientSocket(socket);
+
+    socket.emit("joinRoom", { roomId: joinRoomInput });
+  };
+
+  const copyToClipboard = () => {
+    if (gameId) {
+      navigator.clipboard.writeText(gameId);
+      toast({
+        title: "Room Id Copied",
+        variant: "default",
+      });
     }
+  };
 
-    const handleJoinGame = async () => {
-        if(!joinRoomInput.trim()) return alert("Please enter a valid Room Id");
-
-        const socket = await getSocket();
-        setClientSocket(socket);
-
-        socket.emit("joinRoom", { roomId: joinRoomInput });
-
-        setShowJoinModal(false);
-    }
-
-    const copyToClipboard = () => {
-        if(gameId) {
-            navigator.clipboard.writeText(gameId);
-            alert("Room Id Copied")
-        }
-    }
-
-    return (
-        <div>
-            <Button onClick={handleCreateBtnClick}>Create</Button>
-            <Button onClick={handleJoinBtnClick}>Join</Button>
-            {/* Modal */}
-            {showCreateModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-5 rounded-lg shadow-lg w-[300px] text-center">
-                        <h2 className="text-lg font-semibold mb-2">Game Room Created</h2>
-                        <p className="text-gray-600 mb-4">Room ID: <span className="font-mono">{gameId}</span></p>
-                        <Button onClick={copyToClipboard}>Copy Room ID</Button>
-                        <Button className="mt-2 bg-red-500 hover:bg-red-600" onClick={() => setShowCreateModal(false)}>Close</Button>
-                    </div>
-                </div>
-            )}
-
-            {/* Join Game Modal */}
-            {showJoinModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-5 rounded-lg shadow-lg w-[300px] text-center">
-                        <h2 className="text-lg font-semibold mb-2">Join Game</h2>
-                        <input 
-                            type="text" 
-                            placeholder="Enter Room ID" 
-                            value={joinRoomInput} 
-                            onChange={(e) => setJoinRoomInput(e.target.value)} 
-                            className="border rounded p-2 w-full mb-4"
-                        />
-                        <Button onClick={handleJoinGame}>Join Game</Button>
-                        <Button className="mt-2 bg-red-500 hover:bg-red-600" onClick={() => setShowJoinModal(false)}>Cancel</Button>
-                    </div>
-                </div>
-            )}
-        </div>
-    )
-}
+  return (
+    <div className="container mx-auto flex flex-col items-center gap-8 px-4 text-center">
+      <h1 className="text-4xl font-semibold max-w-2xl leading-relaxed">
+        Set Up Your Own Chess Arena -{" "}
+        <span className="text-primary">Create</span> or{" "}
+        <span className="text-primary">Join</span> a Game
+      </h1>
+      <h2 className="text-lg max-w-2xl text-secondary px-4">
+        Create a custom game, share your Room ID, and{" "}
+        <span className="text-primary">challenge your friends</span>—or jump
+        into their game with their Room ID. Let the battles begin!
+      </h2>
+      <div className="flex gap-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="text-lg py-6 px-8 font-semibold"
+              onClick={handleCreateBtnClick}
+            >
+              Create
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md flex flex-col">
+            <DialogTitle className="text-center text-xl">
+              Create Game
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Share this Room Id with your friends
+            </DialogDescription>
+            <div className="flex gap-2 items-center">
+              <Input value={gameId ?? ""} readOnly />
+              <Button
+                onClick={copyToClipboard}
+                variant="outline"
+                size="icon"
+                className="px-3"
+              >
+                <Copy />
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="text-lg py-6 px-8 font-semibold"
+            >
+              Join
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md flex flex-col gap-6">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl">
+                Join Game
+              </DialogTitle>
+            </DialogHeader>
+            <Input
+              value={joinRoomInput}
+              onChange={(e) => setJoinRoomInput(e.target.value)}
+              placeholder="Enter Room Id"
+              type="text"
+            />
+            <Button onClick={handleJoinGame}>Join</Button>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+};
 
 export default CustomGame;

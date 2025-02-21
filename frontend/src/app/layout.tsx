@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -29,10 +30,11 @@ export default function RootLayout({
         )}
       >
         {" "}
-        <header>
+        <header className="mb-28">
           <Navbar />
         </header>
         <main className="flex-grow">{children}</main>
+        <Toaster/>
       </body>
     </html>
   );
