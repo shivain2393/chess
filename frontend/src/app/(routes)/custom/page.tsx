@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Copy } from "lucide-react";
+import HighlightedText from "@/components/HighlightedText";
 
 const CustomGame = () => {
   const [clientSocket, setClientSocket] = useState<Socket | null>(null);
@@ -93,6 +94,7 @@ const CustomGame = () => {
       toast({
         title: "Room Id Copied",
         variant: "default",
+        duration: 1000
       });
     }
   };
@@ -101,12 +103,12 @@ const CustomGame = () => {
     <div className="container mx-auto flex flex-col items-center gap-8 px-4 text-center">
       <h1 className="text-4xl font-semibold max-w-2xl leading-relaxed">
         Set Up Your Own Chess Arena -{" "}
-        <span className="text-primary">Create</span> or{" "}
-        <span className="text-primary">Join</span> a Game
+        <HighlightedText>Create</HighlightedText> or{" "}
+        <HighlightedText>Join</HighlightedText> a Game
       </h1>
-      <h2 className="text-lg max-w-2xl text-secondary px-4">
+      <h2 className="text-lg max-w-2xl text-muted-foreground px-4">
         Create a custom game, share your Room ID, and{" "}
-        <span className="text-primary">challenge your friends</span>—or jump
+        <HighlightedText>challenge your friends</HighlightedText>—or jump
         into their game with their Room ID. Let the battles begin!
       </h2>
       <div className="flex gap-4">

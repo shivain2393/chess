@@ -20,7 +20,7 @@ export const connectSocket = () : Socket => {
         })
 
         socket.on("error", (error) => {
-            console.error("Socket Error: ", error);
+            console.log("Socket Error: ", error);
         })
     }
 

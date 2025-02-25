@@ -50,7 +50,7 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
 
 
     } catch (error) {
-        console.error(`Error in validating moves: ${error}`)
+        console.log(`Error in validating moves: ${error}`)
         socket.emit("error", { message: "An error occurred while processing your move" })
         return null;
     }

@@ -1,5 +1,6 @@
 'use client';
 
+import HighlightedText from "@/components/HighlightedText";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Scale } from "lucide-react";
 import { motion } from "motion/react";
@@ -12,10 +13,10 @@ const Home = () => {
   return (
     <div className="container mx-auto flex flex-col items-center gap-8 px-4 text-center leading-loose">
       <h1 className="text-5xl font-semibold leading-relaxed">
-        Welcome to <span className="text-primary">Chessify!</span>
+        Welcome to <HighlightedText>Chessify!</HighlightedText>
       </h1>
-      <p className="text-secondary text-xl max-w-2xl text-center px-2">
-        The ultimate destination to play <span className="text-primary">chess</span>—challenge <span className="text-primary">players online</span> or enjoy a match with <span className="text-primary">friends</span>!
+      <p className="text-muted-foreground text-xl max-w-2xl text-center px-2">
+        The ultimate destination to play <HighlightedText>chess</HighlightedText>—challenge <HighlightedText>players online</HighlightedText> or enjoy a match with <HighlightedText>friends</HighlightedText>!
       </p>
       <motion.div 
       variants={{

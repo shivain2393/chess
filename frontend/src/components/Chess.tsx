@@ -1,5 +1,6 @@
 'use client';
 
+import { useToast } from '@/hooks/use-toast';
 import { setupSocketListeners } from '@/lib/socket';
 import { Chess as ChessGame, Square } from 'chess.js';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,8 @@ interface ChessProps {
     gameId: any;
 }
 
+const TOAST_DURATION = 1000;
+
 const Chess = ({ playerRole, socket, gameId } : ChessProps) => {
     const [game, setGame] = useState(new ChessGame());
     const [fen, setFen] = useState<string>(game.fen());
@@ -19,6 +22,7 @@ const Chess = ({ playerRole, socket, gameId } : ChessProps) => {
     const [isCheckMate, setIsCheckMate] = useState<boolean>(false);
     const [kingSquare, setKingSquare] = useState<Square | null>(null);
     const [legalMoves, setLegalMoves] = useState<{ [square: string]: string }>({});
+    const { toast } = useToast();
 
 
     useEffect(() => {
@@ -59,7 +63,11 @@ const Chess = ({ playerRole, socket, gameId } : ChessProps) => {
         if(!socket || !playerRole) return false;
 
         if((game.turn() === 'w' && playerRole !== 'white') || (game.turn() === 'b' && playerRole !=='black')) {
-            alert("Not your turn");
+            toast({
+                title: "Not your turn",
+                variant: "destructive",
+                duration: TOAST_DURATION
+            })
             return false;
         }
 
@@ -73,7 +81,11 @@ const Chess = ({ playerRole, socket, gameId } : ChessProps) => {
     
             return true;
         } catch (error) {
-            alert("Invalid move");
+            toast({
+                title: "Invalid move",
+                variant: "destructive",
+                duration: TOAST_DURATION
+            })
             return false;
         }
     }

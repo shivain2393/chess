@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
+import Providers from "@/components/Providers";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,19 +23,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           "flex flex-col w-full min-h-screen antialiased",
           poppins.className
         )}
       >
-        {" "}
-        <header className="mb-28">
-          <Navbar />
-        </header>
-        <main className="flex-grow">{children}</main>
-        <Toaster/>
+        <Providers>           
+          <header className="mb-28">
+              <Navbar />
+          </header>
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Toaster/>
+        </Providers>
       </body>
     </html>
   );
