@@ -9,39 +9,52 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 const Game = () => {
-  const { gameId } = useParams();
+  const params = useParams();
+  const gameId = params.gameId as string;
   const [playerRole, setPlayerRole] = useState<"white" | "black" | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [ isConnecting , setIsConnecting] = useState<boolean> (true);
 
   useEffect(() => {
-    let isMounted = true;
+    const initializeSocket = async () => {
+      try {
+        setIsConnecting(true);
+        const socketInstance = await getSocket();
 
-    const getPlayerRole = async () => {
-      const socketInstance = await getSocket();
-      setSocket(socketInstance);
+        if(!socketInstance) {
+          console.error("Failed to connect to socket server");
+          return;
+        }
 
-      setupSocketListeners(socketInstance, {
-        onPlayerRole: (role) => {
-          setPlayerRole(role);
-        },
-      });
+        setSocket(socketInstance);
 
-      socketInstance.emit("getPlayerRole", { roomId: gameId });
-    };
+        setupSocketListeners(socketInstance, {
+          onPlayerRole: (role) => {
+            setPlayerRole(role);
+            setIsConnecting(false);
+          }
+        });
 
-    getPlayerRole();
+        socketInstance.emit("getPlayerRole", { roomId: gameId });
 
-    return () => {
-      isMounted = false;
-      if (socket) {
-        socket.off("playerRole");
-        socket.off("roomFull");
-        socket.off("startGame");
-        socket.off("gameState");
-        socket.off("gameOver");
+      } catch (error) {
+        console.error("Socket Connection Error: ", error);
+        setIsConnecting(false);
       }
     };
-  });
+
+    if(gameId) {
+      initializeSocket();
+    }
+
+    return () => {
+      if(socket) {
+        ["playerRole", "roomFull", "startGame", "gameState", "gameOver"].forEach(event => {
+          socket.off(event);
+        })
+      }
+    }
+  }, [gameId]);
 
   return (
     <div className={cn(
@@ -54,7 +67,7 @@ const Game = () => {
         <Chess playerRole={playerRole} socket={socket} gameId={gameId}/>
       ) : (
         <Loading>
-          Loading Game
+          {isConnecting ? "Connecting to the game..." : "Waiting for opponent..."}
         </Loading>
       )}
     </div>

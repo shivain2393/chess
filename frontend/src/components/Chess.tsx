@@ -106,6 +106,7 @@ const Chess = ({ playerRole, socket, gameId } : ChessProps) => {
                 variant: "destructive",
                 duration: TOAST_DURATION
             })
+            console.log("Invalid move", error);
             return false;
         }
     }

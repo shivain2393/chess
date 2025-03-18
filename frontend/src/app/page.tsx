@@ -2,7 +2,7 @@
 
 import HighlightedText from "@/components/HighlightedText";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Scale } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 
