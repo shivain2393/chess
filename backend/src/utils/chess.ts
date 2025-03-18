@@ -30,10 +30,10 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
         const updatedPgn = game.pgn ? `${game.pgn} ${chess.pgn().split("\n\n")[1]}` : chess.pgn()
         const updatedFen = chess.fen();
     
-        let gameStatus = "ongoing";
-        if(chess.isCheckmate()) gameStatus = "checkmate";
-        else if (chess.isDraw()) gameStatus = "draw";
-        else if (chess.isStalemate()) gameStatus = "stalemate";
+        let gameStatus = "Ongoing";
+        if(chess.isCheckmate()) gameStatus = "Checkmate";
+        else if (chess.isDraw()) gameStatus = "Draw";
+        else if (chess.isStalemate()) gameStatus = "Stalemate";
     
     
         return await prisma.game.update({
@@ -44,7 +44,7 @@ export const validateMoves = async (game: Game, player: PlayerRole, socket: Sock
                 fen: updatedFen,
                 pgn: updatedPgn,
                 turn: isWhiteTurn ? Turn.black : Turn.white,
-                result: gameStatus !== "ongoing" ? gameStatus : null
+                result: gameStatus !== "Ongoing" ? gameStatus : null
             }
         })
 

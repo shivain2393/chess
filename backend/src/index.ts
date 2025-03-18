@@ -2,12 +2,12 @@ import app from './app';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { setupSocket } from './sockets/gameSocket';
-import { PORT } from './config/env';
+import { FRONTEND_URL, PORT } from './config/env';
 
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*"
+        origin: FRONTEND_URL
     }
 });
 
